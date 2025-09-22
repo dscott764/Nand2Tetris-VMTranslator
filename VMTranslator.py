@@ -1,5 +1,5 @@
 import sys
-from Parser import Parser
+from Parser import Parser, CommandType
 
 
 def main():
@@ -15,6 +15,9 @@ def main():
 
         while parser.hasMoreCommands():
             parser.advance()
+            cmd_type = parser.commandType()
+
+            print(f'Command: \'{parser.current_command}\', Type: {cmd_type}')
     except FileNotFoundError:
         print(f'Error: File not found at "{file_path}"')
         sys.exit(1)
