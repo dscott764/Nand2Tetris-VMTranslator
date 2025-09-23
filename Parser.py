@@ -61,3 +61,26 @@ class Parser:
         else:
             return -1
 
+    def arg1(self):
+        """
+        Returns the first argument of the current command.
+        For C_ARITHMETIC, the command itself is returned.
+        """
+        cmd_type = self.commandType()
+
+        if cmd_type == CommandType.C_ARITHMETIC:
+            # For arithmetic commands, return the command itself (e.g., 'add')
+            return self.current_command.split()[0]
+        elif cmd_type != CommandType.C_RETURN:
+            # For most other commands, return the second word
+            return self.current_command.split()[1]
+
+    def arg2(self):
+        """
+        Returns the second argument of the current command.
+        Should only be called for C_PUSH, C_POP, C_FUNCTION, or C_CALL.
+        """
+        # The second argument is the third word in the command, returned as an
+        # int 
+        return int(self.current_command.split()[2])
+
