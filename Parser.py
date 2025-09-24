@@ -37,7 +37,7 @@ class Parser:
         self.current_line_index = -1
         self.current_command = ''
 
-    def hasMoreCommands(self):
+    def has_more_commands(self):
         """Returns True if there are any more commands in the input."""
         return self.current_line_index < len(self.lines) - 1
 
@@ -48,7 +48,7 @@ class Parser:
         self.current_line_index += 1
         self.current_command = self.lines[self.current_line_index]
 
-    def commandType(self):
+    def command_type(self):
         """Returns the type of the current VM command."""
         first_word  = self.current_command.split()[0]
 
@@ -59,14 +59,15 @@ class Parser:
         elif first_word == 'pop':
             return CommandType.C_POP
         else:
-            return -1
+            raise ValueError(
+                f'Unknown command type for: {self.current_command}')
 
     def arg1(self):
         """
         Returns the first argument of the current command.
         For C_ARITHMETIC, the command itself is returned.
         """
-        cmd_type = self.commandType()
+        cmd_type = self.command_type()
 
         if cmd_type == CommandType.C_ARITHMETIC:
             # For arithmetic commands, return the command itself (e.g., 'add')
