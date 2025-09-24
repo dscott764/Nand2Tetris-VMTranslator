@@ -1,0 +1,12 @@
+# Python cache
+__pycache__/
+
+# Vim swap files
+*.swp
+
+# Build artifacts
+*.asm
+
+# Personal secrets
+personal-access-token.txt
+
