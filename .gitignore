@@ -10,3 +10,8 @@ __pycache__/
 # Personal secrets
 personal-access-token.txt
 
+# Test files
+*.cmp
+*.tst
+*.vm
+
