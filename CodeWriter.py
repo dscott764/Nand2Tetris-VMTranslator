@@ -8,6 +8,53 @@ class CodeWriter:
         """
         self.output_file = open(output_file_path, 'w')
         self.label_counter = 0  # To generate unique labels
+        self.segment_registers = {  # Map segments to their base registers
+            'local': 'LCL',
+            'argument': 'ARG',
+            'this': 'THIS',
+            'that': 'THAT'
+        }
+
+    def _write_pop(self, segment, index):
+        """Helper to write code for popping to a memory segment."""
+        assembly_code = []
+        if segment == 'temp':
+            target_addr = 5 + index
+            assembly_code.extend([
+                f'// pop temp {index}',
+                f'@{target_addr}',
+                'D=A',              # D = 5 + index (target address)
+                '@R13',
+                'M=D',              # R13 = target address (temp storage)
+                '@SP',
+                'M=M-1',            # SP--
+                'A=M',              # A = SP (top of stack)
+                'D=M',              # D = *SP (value to pop)
+                '@R13',
+                'A=M',              # A = target address
+                'M=D'               # *address = value
+            ])
+        else:  
+            base_reg = self.segment_registers.get(segment)
+            if base_reg is None:
+                raise ValueError(f'Unsupported segment for pop: {segment}')
+            assembly_code.extend([
+                f'// pop {segment} {index}',
+                f'@{index}',
+                'D=A',              # D = index
+                f'@{base_reg}',
+                'D=D+M',            # D = LCL + index (target address)
+                '@R13',
+                'M=D',              # R13 = target address (temp storage)
+                '@SP',
+                'M=M-1',            # SP--
+                'A=M',              # A = SP (top of stack)
+                'D=M',              # D = *SP (value to pop)
+                '@R13',
+                'A=M',              # A = target address
+                'M=D'               # *address = value
+            ])
+        return assembly_code
 
     def _write_binary_op(self, operation):
         """Helper to write code for binary operations."""
@@ -182,8 +229,36 @@ class CodeWriter:
                     '@SP',          # Get the stack pointer address
                     'M=M+1'         # Increment the stack pointer
                 ])
+            elif segment in self.segment_registers:
+                base_reg = self.segment_registers.get(segment)
+                assembly_code.extend([
+                    f'// push {segment} {index}',
+                    f'@{index}',
+                    'D=A',          # D = index
+                    f'@{base_reg}',
+                    'A=M',          # A = base address of segment
+                    'A=D+A',        # A = address + index
+                    'D=M',          # D = value at RAM[address + index]
+                    '@SP',
+                    'A=M',
+                    'M=D',          # *SP = D
+                    '@SP',
+                    'M=M+1'         # SP++
+                ])
+            elif segment == 'temp':
+                target_addr = 5 + index
+                assembly_code.extend([
+                    f'// push temp {index}',
+                    f'@{target_addr}',
+                    'D=M',          # D = value at RAM[5 + index]
+                    '@SP',
+                    'A=M',
+                    'M=D',
+                    '@SP',
+                    'M=M+1'
+                ])
         elif command == CommandType.C_POP:
-            pass
+            assembly_code.extend(self._write_pop(segment, index))
 
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
