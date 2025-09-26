@@ -71,125 +71,51 @@ class CodeWriter:
             'M=M+1'
         ]
 
+    def _write_comparison_op(self, jump_mnemonic):
+        """Helper for eq, lt, gt, which share the same structure."""
+        true_label = f'{jump_mnemonic}_TRUE_{self.label_counter}'
+        end_label = f'{jump_mnemonic}_END_{self.label_counter}'
+        self.label_counter += 1
+
+        return [
+            f'// {jump_mnemonic.lower()}',
+            '@SP',
+            'M=M-1',
+            'A=M',
+            'D=M',
+            '@SP',
+            'M=M-1',
+            'A=M',
+            'D=M-D',
+            f'@{true_label}',
+            'D;{jump_mnemonic}',
+            'D=0',
+            f'@{end_label}',
+            '0;JMP',
+            f'({true_label})',
+            'D=-1',
+            f'({end_label})',
+            '@SP',
+            'A=M',
+            'M=D',
+            '@SP',
+            'M=M+1'
+        ]
+
     def write_arithmetic(self, command):
         """Writes the assembly code for the given arithmetic command."""
         assembly_code = []
-        if command == 'add':
-            assembly_code.extend(self._write_binary_op('M=D+M'))
-        elif command == 'sub':
-            assembly_code.extend(self._write_binary_op('M=M-D'))
-        elif command == 'and':
-            assembly_code.extend(self._write_binary_op('M=D&M'))
-        elif command == 'or':
-            assembly_code.extend(self._write_binary_op('M=D|M'))
+        if command in ['add', 'sub', 'and', 'or']:
+            op_map = {
+                'add': 'M=D+M', 'sub': 'M=M-D', 'and': 'M=D&M', 'or': 'M=D|M'
+            }
+            assembly_code.extend(self._write_binary_op(op_map[command]))
         elif command == 'eq':
-            # Generate unique labels for this comparison
-            true_label = f'EQ_TRUE_{self.label_counter}'
-            end_label = f'EQ_END_{self.label_counter}'
-            self.label_counter += 1
-
-            assembly_code.extend([
-                f'// eq',
-                '@SP',
-                'M=M-1',    # Decrement SP
-                'A=M',
-                'D=M',      # D = y (first value)
-                '@SP',
-                'M=M-1',    # Decrement SP
-                'A=M',
-                'D=M-D',    # D = x - y
-                f'@{true_label}',
-                'D;JEQ',    # If x == y (D is zero), jump to TRUE case
-
-                # False case: set D to 0
-                'D=0',
-                f'@{end_label}',
-                '0;JMP',    # Unconditionally jump to the end
-
-                # True case: set D to -1
-                f'({true_label})',
-                'D=-1',
-
-                # Push the result from D onto the stack
-                f'({end_label})',
-                '@SP',
-                'A=M',
-                'M=D',      # *SP = D (which is 0 or -1)
-                '@SP',
-                'M=M+1'     # SP++
-            ])
+            assembly_code.extend(self._write_comparison_op('JEQ'))
         elif command == 'lt':
-            # Generate unique labels for this comparison
-            true_label = f'LT_TRUE_{self.label_counter}'
-            end_label = f'LT_END_{self.label_counter}'
-            self.label_counter += 1
-
-            assembly_code.extend([
-                f'// lt',
-                '@SP',
-                'M=M-1',
-                'A=M',
-                'D=M',      # D = y
-                '@SP',
-                'M=M-1',
-                'A=M',
-                'D=M-D',    # D = x - y
-                f'@{true_label}',
-                'D;JLT',    # If x < y (D is negative), jump to TRUE
-
-                # False case: set D to 0
-                'D=0',
-                f'@{end_label}',
-                '0;JMP',
-
-                # True case: set D to -1
-                f'({true_label})',
-                'D=-1',
-
-                # Push the result from D onto the stack
-                f'({end_label})',
-                '@SP',
-                'A=M',
-                'M=D',
-                '@SP',
-                'M=M+1'
-            ])
+            assembly_code.extend(self._write_comparison_op('JLT'))
         elif command == 'gt':
-            # Generate unique labels for this comparison
-            true_label = f'GT_TRUE_{self.label_counter}'
-            end_label = f'GT_END_{self.label_counter}'
-            self.label_counter += 1
-
-            assembly_code.extend([
-                f'// gt',
-                '@SP',
-                'M=M-1',
-                'A=M',
-                'D=M',      # D = y
-                '@SP',
-                'M=M-1',
-                'A=M',
-                'D=M-D',    # D = x - y
-                f'@{true_label}',
-                'D;JGT',    # If x > y (D is positive), jump to TRUE
-
-                # False case: set D to 0
-                'D=0',
-                f'@{end_label}',
-                '0;JMP',
-
-                # True case: set D to -1
-                f'({true_label})',
-                'D=-1',
-
-                # Push the result from D onto the stack
-                f'({end_label})',
-                '@SP',
-                'A=M',
-                'M=D',
-                '@SP',
-                'M=M+1'
-            ])
+            assembly_code.extend(self._write_comparison_op('JGT'))
         elif command == 'neg':
             assembly_code.extend([
                 '// neg',
