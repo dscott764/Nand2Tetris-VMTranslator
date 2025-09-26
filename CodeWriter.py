@@ -139,6 +139,35 @@ class CodeWriter:
 
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
+    def _write_pointer_push(self, index):
+        """Helper to write code for pushing from pointer segment."""
+        ptr_addr = 3 + index    # 3 for pointer 0 (THIS),
+                                # 4 for pointer 1 (THAT)
+        return [
+            f'// push pointer {index}',
+            f'@{ptr_addr}',
+            'D=M',
+            '@SP',
+            'A=M',
+            'M=D',              # D = * (3 + index)
+            '@SP',
+            'M=M+1'             # SP++
+        ]
+
+    def _write_pointer_pop(self, index):
+        """Helper to write code for popping to pointer segment."""
+        ptr_addr = 3 + index    # 3 for pointer 0 (THIS),
+                                # 4 for pointer 1 (THAT)
+        return [
+            f'//pop pointer {index}',
+            '@SP',
+            'M=M-1',            # SP--
+            'A=M',
+            'D=M',              # D = *SP (value to pop)
+            f'@{ptr_addr}',
+            'M=D'               # *(3 + index) = D
+        ]
+
     def write_push_pop(self, command, segment, index):
         """Writes the assembly code for C_PUSH or C_POP commands."""
         assembly_code = []
@@ -155,6 +184,8 @@ class CodeWriter:
                     '@SP',          # Get the stack pointer address
                     'M=M+1'         # Increment the stack pointer
                 ])
+            elif segment == 'pointer':
+                assembly_code.extend(self._write_pointer_push(index))
             elif segment in self.segment_registers:
                 base_reg = self.segment_registers.get(segment)
                 assembly_code.extend([
@@ -184,7 +215,10 @@ class CodeWriter:
                     'M=M+1'
                 ])
         elif command == CommandType.C_POP:
-            assembly_code.extend(self._write_pop(segment, index))
+            if segment == 'pointer':
+                assembly_code.extend(self._write_pointer_pop(index))
+            else:
+                assembly_code.extend(self._write_pop(segment, index))
 
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
