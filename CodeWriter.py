@@ -2,7 +2,7 @@ from Parser import CommandType
 
 
 class CodeWriter:
-    def __init__(self, output_file_path):
+    def __init__(self, output_file_path, file_name):
         """
         Opens the output file for writing and prepares for code generation.
         """
@@ -14,6 +14,8 @@ class CodeWriter:
             'this': 'THIS',
             'that': 'THAT'
         }
+        self.file_name = file_name  # Base name of the .vm file for static
+                                    # labels
 
     def _write_pop(self, segment, index):
         """Helper to write code for popping to a memory segment."""
@@ -55,6 +57,31 @@ class CodeWriter:
                 'M=D'               # *address = value
             ])
         return assembly_code
+
+    def _write_static_push(self, index):
+        """Helper to write code for pushing from static segment."""
+        return [
+            f'// push static {index}',
+            f'@{self.file_name}.{index}',
+            'D=M',              # D = static value
+            '@SP',
+            'A=M',
+            'M=D',              # *SP = D
+            '@SP',
+            'M=M+1'             # SP++
+        ]
+
+    def _write_static_pop(self, index):
+        """Helper to write code for popping to static segment."""
+        return [
+            f'// pop static {index}',
+            '@SP',
+            'M=M-1',            # SP--
+            'A=M',
+            'D=M',              # D = *SP (value to pop)
+            f'@{self.file_name}.{index}',
+            'M=D'               # static = D
+        ]
 
     def _write_binary_op(self, operation):
         """Helper to write code for binary operations."""
@@ -184,6 +211,8 @@ class CodeWriter:
                     '@SP',          # Get the stack pointer address
                     'M=M+1'         # Increment the stack pointer
                 ])
+            elif segment == 'static':
+                assembly_code.extend(self._write_static_push(index))
             elif segment == 'pointer':
                 assembly_code.extend(self._write_pointer_push(index))
             elif segment in self.segment_registers:
@@ -217,6 +246,8 @@ class CodeWriter:
         elif command == CommandType.C_POP:
             if segment == 'pointer':
                 assembly_code.extend(self._write_pointer_pop(index))
+            elif segment == 'static':
+                assembly_code.extend(self._write_static_pop(index))
             else:
                 assembly_code.extend(self._write_pop(segment, index))
 

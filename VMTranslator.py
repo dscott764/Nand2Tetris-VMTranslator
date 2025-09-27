@@ -15,7 +15,7 @@ def main():
 
     try:
         parser = Parser(input_path)
-        code_writer = CodeWriter(output_path)
+        code_writer = CodeWriter(output_path, base_name)
 
         while parser.has_more_commands():
             parser.advance()
