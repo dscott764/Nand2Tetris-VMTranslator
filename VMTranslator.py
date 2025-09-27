@@ -10,12 +10,13 @@ def main():
         sys.exit(1)
 
     input_path = sys.argv[1]
-    base_name = os.path.splitext(input_path)[0]
-    output_path = base_name + '.asm'
+    base_name_with_path = os.path.splitext(input_path)[0]
+    output_path = base_name_with_path + '.asm'
+    file_name_for_static = os.path.basename(base_name_with_path)
 
     try:
         parser = Parser(input_path)
-        code_writer = CodeWriter(output_path, base_name)
+        code_writer = CodeWriter(output_path, file_name_for_static)
 
         while parser.has_more_commands():
             parser.advance()

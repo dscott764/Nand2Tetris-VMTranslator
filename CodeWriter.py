@@ -115,7 +115,7 @@ class CodeWriter:
             'A=M',
             'D=M-D',
             f'@{true_label}',
-            'D;{jump_mnemonic}',
+            f'D;{jump_mnemonic}',
             'D=0',
             f'@{end_label}',
             '0;JMP',
