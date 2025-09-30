@@ -270,6 +270,15 @@ class CodeWriter:
         ]
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
+    def write_goto(self, label):
+        """Writes the assembly code for a C_GOTO command."""
+        assembly_code = [
+            f'// goto {label}',
+            f'@{label}',
+            '0;JMP'
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
     def close(self):
         """Closes the output file."""
         self.output_file.close()

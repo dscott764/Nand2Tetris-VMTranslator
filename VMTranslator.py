@@ -35,6 +35,9 @@ def main():
             elif cmd_type == CommandType.C_IF:
                 label = parser.arg1()
                 code_writer.write_if(label)
+            elif cmd_type == CommandType.C_GOTO:
+                label = parser.arg1()
+                code_writer.write_goto(label)
 
         code_writer.close()
         print(f'Translation finished.  Output written to {output_path}')

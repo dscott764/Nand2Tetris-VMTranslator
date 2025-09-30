@@ -62,6 +62,8 @@ class Parser:
             return CommandType.C_LABEL
         elif first_word == 'if-goto':
             return CommandType.C_IF
+        elif first_word == 'goto':
+            return CommandType.C_GOTO
         else:
             raise ValueError(
                 f'Unknown command type for: {self.current_command}')
