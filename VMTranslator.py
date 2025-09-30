@@ -29,6 +29,12 @@ def main():
                 segment = parser.arg1()
                 index = parser.arg2()
                 code_writer.write_push_pop(cmd_type, segment, index)
+            elif cmd_type == CommandType.C_LABEL:
+                label = parser.arg1()
+                code_writer.write_label(label)
+            elif cmd_type == CommandType.C_IF:
+                label = parser.arg1()
+                code_writer.write_if(label)
 
         code_writer.close()
         print(f'Translation finished.  Output written to {output_path}')

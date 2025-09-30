@@ -253,6 +253,23 @@ class CodeWriter:
 
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
+    def write_label(self, symbol):
+        """Writes the assembly code for a C_LABEL command."""
+        self.output_file.write(f'\n({symbol})\n')
+
+    def write_if(self, label):
+        """Writes the assembly code for a C_IF command."""
+        assembly_code = [
+            f'// if-goto {label}',
+            '@SP',
+            'M=M-1',    # Pop value from stack
+            'A=M',
+            'D=M',      # D = popped value
+            f'@{label}',
+            'D;JNE'     # Jump to label if D is not equal to 0
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
     def close(self):
         """Closes the output file."""
         self.output_file.close()
