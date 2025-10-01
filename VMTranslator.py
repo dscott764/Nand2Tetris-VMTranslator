@@ -38,6 +38,12 @@ def main():
             elif cmd_type == CommandType.C_GOTO:
                 label = parser.arg1()
                 code_writer.write_goto(label)
+            elif cmd_type == CommandType.C_FUNCTION:
+                function_name = parser.arg1()
+                n_vars = parser.arg2()
+                code_writer.write_function(function_name, n_vars)
+            elif cmd_type == CommandType.C_RETURN:
+                code_writer.write_return()
 
         code_writer.close()
         print(f'Translation finished.  Output written to {output_path}')

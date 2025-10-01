@@ -64,6 +64,10 @@ class Parser:
             return CommandType.C_IF
         elif first_word == 'goto':
             return CommandType.C_GOTO
+        elif first_word == 'function':
+            return CommandType.C_FUNCTION
+        elif first_word == 'return':
+            return CommandType.C_RETURN
         else:
             raise ValueError(
                 f'Unknown command type for: {self.current_command}')

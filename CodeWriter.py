@@ -279,6 +279,68 @@ class CodeWriter:
         ]
         self.output_file.write('\n'.join(assembly_code) + '\n')
 
+    def write_function(self, function_name, n_vars):
+        """Writes assembly for the 'function' command."""
+        assembly_code = [
+            f'({function_name})' # Create the function label
+        ]
+        # Push 0 n_vars times
+        for _ in range(n_vars):
+            assembly_code.extend([
+                '@SP',
+                'A=M',
+                'M=0',
+                '@SP',
+                'M=M+1'
+            ])
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
+    def write_return(self):
+        """Writes assembly for the 'return' command."""
+        assembly_code = [
+            '// return',
+            '@LCL',
+            'D=M',
+            '@R13',             # R13 (endFrame) = LCL
+            'M=D',
+
+            '@5',
+            'A=D-A',
+            'D=M',
+            '@R14',             # R14 (retAddr) = *(endFrame - 5)
+            'M=D',
+
+            '// *ARG = pop()',
+            '@SP',
+            'M=M-1',
+            'A=M',
+            'D=M',
+            '@ARG',
+            'A=M',
+            'M=D',
+
+            '// SP = ARG + 1',
+            '@ARG',
+            'D=M+1',
+            '@SP',
+            'M=D',
+
+            '// THAT = *(endFrame - 1)',
+            '@R13', 'M=M-1', 'A=M', 'D=M', '@THAT', 'M=D',
+            '// THIS = *(endFrame - 2)',
+            '@R13', 'M=M-1', 'A=M', 'D=M', '@THIS', 'M=D',
+            '// ARG = *(endFrame - 3)',
+            '@R13', 'M=M-1', 'A=M', 'D=M', '@ARG', 'M=D',
+            '// LCL = *(endFrame - 4)',
+            '@R13', 'M=M-1', 'A=M', 'D=M', '@LCL', 'M=D',
+
+            '// goto retAddr',
+            '@R14',
+            'A=M',
+            '0;JMP'
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
     def close(self):
         """Closes the output file."""
         self.output_file.close()
