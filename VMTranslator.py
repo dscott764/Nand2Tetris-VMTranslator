@@ -41,8 +41,14 @@ def main():
         # Create one CodeWriter for the single output file
         code_writer = CodeWriter(output_path)
 
-        # Write the bootstrap code
-        code_writer.write_init()
+        # Always init SP for directories
+        code_writer.write_sp_init()
+
+        # Call Sys.init only if Sys.vm is present
+        has_sys = any(os.path.basename(vm_file).lower() == 'sys.vm'
+                      for vm_file in files_to_translate)
+        if has_sys:
+            code_writer.write_call('Sys.init', 0)
 
         # Loop through each .vm file
         for vm_file_path in files_to_translate:

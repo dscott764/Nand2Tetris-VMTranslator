@@ -16,6 +16,17 @@ class CodeWriter:
         }
         self.file_name = ''
 
+    def write_sp_init(self):
+        """Writes assembly to initialize SP=256 (no Sys.init call)."""
+        assembly_code = [
+            '// Bootstrap Code',
+            '@256',
+            'D=A',
+            '@SP',
+            'M=D'
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
     def _write_pop(self, segment, index):
         """Helper to write code for popping to a memory segment."""
         assembly_code = []
@@ -374,19 +385,6 @@ class CodeWriter:
             f'({return_label})'
         ]
         self.output_file.write('\n'.join(assembly_code) + '\n')
-
-    def write_init(self):
-        """Writes the bootstrap code that starts the program."""
-        assembly_code = [
-            '// Bootstrap Code',
-            '@256',
-            'D=A',
-            '@SP',
-            'M=D'
-        ]
-        self.output_file.write('\n'.join(assembly_code) + '\n')
-        # After setting SP, call Sys.init
-        self.write_call('Sys.init', 0)
 
     def set_file_name(self, file_name):
         """
