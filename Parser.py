@@ -14,13 +14,13 @@ class CommandType(Enum):
 
 
 class Parser:
-    ARITHMETIC_COMMANDS = { 
-        'add', 'sub', 'neg', 'eq', 'gt', 'lt', 'and', 'or', 'not' 
+    ARITHMETIC_COMMANDS = {
+        'add', 'sub', 'neg', 'eq', 'gt', 'lt', 'and', 'or', 'not'
     }
 
     def __init__(self, file_path):
         """
-        Opens the input file, cleans it of all comments and whitespace, and 
+        Opens the input file, cleans it of all comments and whitespace, and
         stores a list of pure commands.
         """
         with open(file_path, 'r') as file:
@@ -50,9 +50,9 @@ class Parser:
 
     def command_type(self):
         """Returns the type of the current VM command."""
-        first_word  = self.current_command.split()[0]
+        first_word = self.current_command.split()[0]
 
-        if first_word in self.ARITHMETIC_COMMANDS: 
+        if first_word in self.ARITHMETIC_COMMANDS:
             return CommandType.C_ARITHMETIC
         elif first_word == 'push':
             return CommandType.C_PUSH
@@ -94,6 +94,5 @@ class Parser:
         Should only be called for C_PUSH, C_POP, C_FUNCTION, or C_CALL.
         """
         # The second argument is the third word in the command, returned as an
-        # int 
+        # int
         return int(self.current_command.split()[2])
-

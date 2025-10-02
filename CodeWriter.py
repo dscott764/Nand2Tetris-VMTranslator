@@ -35,7 +35,7 @@ class CodeWriter:
                 'A=M',              # A = target address
                 'M=D'               # *address = value
             ])
-        else:  
+        else:
             base_reg = self.segment_registers.get(segment)
             if base_reg is None:
                 raise ValueError(f'Unsupported segment for pop: {segment}')
@@ -167,8 +167,9 @@ class CodeWriter:
 
     def _write_pointer_push(self, index):
         """Helper to write code for pushing from pointer segment."""
-        ptr_addr = 3 + index    # 3 for pointer 0 (THIS),
-                                # 4 for pointer 1 (THAT)
+        # 3 for pointer 0 (THIS), 4 for pointer 1 (THAT)
+        ptr_addr = 3 + index
+
         return [
             f'// push pointer {index}',
             f'@{ptr_addr}',
@@ -182,8 +183,9 @@ class CodeWriter:
 
     def _write_pointer_pop(self, index):
         """Helper to write code for popping to pointer segment."""
-        ptr_addr = 3 + index    # 3 for pointer 0 (THIS),
-                                # 4 for pointer 1 (THAT)
+        # 3 for pointer 0 (THIS), 4 for pointer 1 (THAT)
+        ptr_addr = 3 + index
+
         return [
             f'//pop pointer {index}',
             '@SP',
@@ -205,7 +207,7 @@ class CodeWriter:
                     'D=A',          # Store the constant in the D register
                     '@SP',          # Get the stack pointer address
                     'A=M',          # Set A to the top of the stack
-                    'M=D',          # Write the constant to the top of the 
+                    'M=D',          # Write the constant to the top of the
                                     # stack
                     '@SP',          # Get the stack pointer address
                     'M=M+1'         # Increment the stack pointer
@@ -281,7 +283,7 @@ class CodeWriter:
     def write_function(self, function_name, n_vars):
         """Writes assembly for the 'function' command."""
         assembly_code = [
-            f'({function_name})' # Create the function label
+            f'({function_name})'    # Create the function label
         ]
         # Push 0 n_vars times
         for _ in range(n_vars):
@@ -387,10 +389,12 @@ class CodeWriter:
         self.write_call('Sys.init', 0)
 
     def set_file_name(self, file_name):
-        """Informs the code writer that the translation of a new VM file has started."""
+        """
+        Informs the code writer that the translation of a new VM file has
+        started.
+        """
         self.file_name = file_name
 
     def close(self):
         """Closes the output file."""
         self.output_file.close()
-

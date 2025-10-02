@@ -31,7 +31,9 @@ def main():
         output_path = base_name + '.asm'
         files_to_translate.append(input_path)
     else:
-        print(f'Error: Input path \'{input_path}\' is not a valid file or directory.')
+        print(
+            f'Error: Input path \'{input_path}\' '
+            'is not a valid file or directory.')
         sys.exit(1)
 
     # --- Main Translation Process ---
@@ -89,6 +91,6 @@ def main():
         print(f'Translation Error: {e}')
         sys.exit(1)
 
+
 if __name__ == '__main__':
     main()
-
