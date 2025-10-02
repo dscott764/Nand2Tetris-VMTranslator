@@ -2,7 +2,7 @@ from Parser import CommandType
 
 
 class CodeWriter:
-    def __init__(self, output_file_path, file_name):
+    def __init__(self, output_file_path):
         """
         Opens the output file for writing and prepares for code generation.
         """
@@ -14,8 +14,7 @@ class CodeWriter:
             'this': 'THIS',
             'that': 'THAT'
         }
-        self.file_name = file_name  # Base name of the .vm file for static
-                                    # labels
+        self.file_name = ''
 
     def _write_pop(self, segment, index):
         """Helper to write code for popping to a memory segment."""
@@ -373,6 +372,23 @@ class CodeWriter:
             f'({return_label})'
         ]
         self.output_file.write('\n'.join(assembly_code) + '\n')
+
+    def write_init(self):
+        """Writes the bootstrap code that starts the program."""
+        assembly_code = [
+            '// Bootstrap Code',
+            '@256',
+            'D=A',
+            '@SP',
+            'M=D'
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+        # After setting SP, call Sys.init
+        self.write_call('Sys.init', 0)
+
+    def set_file_name(self, file_name):
+        """Informs the code writer that the translation of a new VM file has started."""
+        self.file_name = file_name
 
     def close(self):
         """Closes the output file."""
