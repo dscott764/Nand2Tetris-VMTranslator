@@ -326,18 +326,51 @@ class CodeWriter:
             'M=D',
 
             '// THAT = *(endFrame - 1)',
-            '@R13', 'M=M-1', 'A=M', 'D=M', '@THAT', 'M=D',
+            '@R13', 'D=M', '@1', 'A=D-A', 'D=M', '@THAT', 'M=D',
             '// THIS = *(endFrame - 2)',
-            '@R13', 'M=M-1', 'A=M', 'D=M', '@THIS', 'M=D',
+            '@R13', 'D=M', '@2', 'A=D-A', 'D=M', '@THIS', 'M=D',
             '// ARG = *(endFrame - 3)',
-            '@R13', 'M=M-1', 'A=M', 'D=M', '@ARG', 'M=D',
+            '@R13', 'D=M', '@3', 'A=D-A', 'D=M', '@ARG', 'M=D',
             '// LCL = *(endFrame - 4)',
-            '@R13', 'M=M-1', 'A=M', 'D=M', '@LCL', 'M=D',
+            '@R13', 'D=M', '@4', 'A=D-A', 'D=M', '@LCL', 'M=D',
 
             '// goto retAddr',
             '@R14',
             'A=M',
             '0;JMP'
+        ]
+        self.output_file.write('\n'.join(assembly_code) + '\n')
+
+    def write_call(self, function_name, n_args):
+        """Writes assembly code for the 'call' command."""
+        return_label = f'{function_name}$ret.{self.label_counter}'
+        self.label_counter += 1
+
+        assembly_code = [
+            f'// call {function_name} {n_args}',
+            # --- Push return-address ---
+            f'@{return_label}',
+            'D=A',
+            '@SP', 'A=M', 'M=D',
+            '@SP', 'M=M+1',
+            # --- Push LCL, ARG, THIS, THAT ---
+            '@LCL', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1',
+            '@ARG', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1',
+            '@THIS', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1',
+            '@THAT', 'D=M', '@SP', 'A=M', 'M=D', '@SP', 'M=M+1',
+            # --- Reposition ARG = SP - 5 - n_args ---
+            '@SP', 'D=M',
+            '@5', 'D=D-A',
+            f'@{n_args}', 'D=D-A',
+            '@ARG', 'M=D',
+            # --- Reposition LCL = SP ---
+            '@SP', 'D=M',
+            '@LCL', 'M=D',
+            # --- Goto function ---
+            f'@{function_name}',
+            '0;JMP',
+            # --- Declare return-address label ---
+            f'({return_label})'
         ]
         self.output_file.write('\n'.join(assembly_code) + '\n')
 

@@ -44,6 +44,10 @@ def main():
                 code_writer.write_function(function_name, n_vars)
             elif cmd_type == CommandType.C_RETURN:
                 code_writer.write_return()
+            elif cmd_type == CommandType.C_CALL:
+                function_name = parser.arg1()
+                n_args = parser.arg2()
+                code_writer.write_call(function_name, n_args)
 
         code_writer.close()
         print(f'Translation finished.  Output written to {output_path}')
